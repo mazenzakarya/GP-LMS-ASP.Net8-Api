@@ -1,0 +1,6 @@
+@GP_LMS_ASP.Net8_Api_HostAddress = http://localhost:5187
+
+GET {{GP_LMS_ASP.Net8_Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
