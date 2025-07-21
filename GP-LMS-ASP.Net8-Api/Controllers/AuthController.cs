@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using GP_LMS_ASP.Net8_Api.Context;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace GP_LMS_ASP.Net8_Api.Controllers
 {
@@ -27,9 +29,9 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
         [Authorize] 
         [HttpPost("register")]
-        public IActionResult Register(RegisterDTO dto)
+        public async Task<IActionResult> Register(RegisterDTO dto)
         {
-            var requesterRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            var requesterRole = User.FindFirst(ClaimTypes.Role).Value;
 
             if (requesterRole == null)
                 return Unauthorized("Invalid token");
@@ -74,10 +76,10 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.Role),
-                new Claim(ClaimTypes.Name, user.Username)
-            }),
+                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()), 
+                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim(ClaimTypes.Name, user.Username)
+                }),
                 Expires = DateTime.UtcNow.AddHours(3),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
@@ -88,7 +90,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var jwt = tokenHandler.WriteToken(token);
 
-            return Ok(new { token = jwt });
+            return Ok(new { token = jwt, user });
         }
     }
 }
