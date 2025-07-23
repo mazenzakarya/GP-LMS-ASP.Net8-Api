@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using GP_LMS_ASP.Net8_Api.Models;
+﻿using GP_LMS_ASP.Net8_Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -11,6 +10,16 @@ namespace GP_LMS_ASP.Net8_Api.Context
 
         public DbSet<User> Users { get; set; }
         public DbSet<Parent> Parents { get; set; }
+        public DbSet<StudentGroup> StudentGroups  { get; set; }
+        public DbSet<Level> Levels  { get; set; }
+        public DbSet<Groups> Groups  { get; set; }
+        public DbSet<GroupPaymentCycle> GroupPaymentCycles  { get; set; }
+        public DbSet<Grade>  Grades { get; set; }
+        public DbSet<Fee> Fees  { get; set; }
+        public DbSet<CourseSubjectElements> CourseSubjectElements  { get; set; }
+        public DbSet<CourseSubject> CourseSubjects  { get; set; }
+        public DbSet<Course> Courses  { get; set; }
+        public DbSet<Attendance>  Attendances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
