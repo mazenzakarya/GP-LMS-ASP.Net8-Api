@@ -3,14 +3,12 @@ using GP_LMS_ASP.Net8_Api.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System;
-using Microsoft.AspNetCore.Http;
+using GP_LMS_ASP.Net8_Api.Context;
+using GP_LMS_ASP.Net8_Api.DTOs;
+using GP_LMS_ASP.Net8_Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using GP_LMS_ASP.Net8_Api.Context;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace GP_LMS_ASP.Net8_Api.Controllers
 {
