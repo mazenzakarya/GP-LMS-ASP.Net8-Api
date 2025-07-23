@@ -4,6 +4,7 @@ using GP_LMS_ASP.Net8_Api.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GP_LMS_ASP.Net8_Api.Migrations
 {
     [DbContext(typeof(MyContext))]
-    partial class MyContextModelSnapshot : ModelSnapshot
+    [Migration("20250723200348_MigrationV05")]
+    partial class MigrationV05
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,7 +56,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Attendances", (string)null);
+                    b.ToTable("Attendances");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Course", b =>
@@ -77,7 +80,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasKey("CourseId");
 
-                    b.ToTable("Courses", (string)null);
+                    b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.CourseSubject", b =>
@@ -102,7 +105,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("CourseSubjects", (string)null);
+                    b.ToTable("CourseSubjects");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.CourseSubjectElements", b =>
@@ -151,7 +154,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("CourseSubjectElements", (string)null);
+                    b.ToTable("CourseSubjectElements");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Fee", b =>
@@ -203,7 +206,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Fees", (string)null);
+                    b.ToTable("Fees");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Grade", b =>
@@ -245,7 +248,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Grades", (string)null);
+                    b.ToTable("Grades");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.GroupPaymentCycle", b =>
@@ -281,7 +284,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("GroupPaymentCycles", (string)null);
+                    b.ToTable("GroupPaymentCycles");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Groups", b =>
@@ -328,7 +331,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("Groups", (string)null);
+                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Level", b =>
@@ -351,7 +354,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasKey("LevelId");
 
-                    b.ToTable("Levels", (string)null);
+                    b.ToTable("Levels");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Parent", b =>
@@ -387,7 +390,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasKey("ParentId");
 
-                    b.ToTable("Parents", (string)null);
+                    b.ToTable("Parents");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.StudentGroup", b =>
@@ -414,7 +417,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("StudentGroups", (string)null);
+                    b.ToTable("StudentGroups");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.User", b =>
@@ -472,7 +475,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Attendance", b =>

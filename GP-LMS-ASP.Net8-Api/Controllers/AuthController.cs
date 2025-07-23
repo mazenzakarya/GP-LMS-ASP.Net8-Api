@@ -1,6 +1,4 @@
-﻿using GP_LMS_ASP.Net8_Api.DTOs;
-using GP_LMS_ASP.Net8_Api.Models;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using GP_LMS_ASP.Net8_Api.Context;
@@ -25,7 +23,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             _config = config;
         }
 
-        [Authorize] 
+        [Authorize]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDTO dto)
         {
@@ -74,7 +72,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()), 
+                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                     new Claim(ClaimTypes.Role, user.Role),
                     new Claim(ClaimTypes.Name, user.Username)
                 }),

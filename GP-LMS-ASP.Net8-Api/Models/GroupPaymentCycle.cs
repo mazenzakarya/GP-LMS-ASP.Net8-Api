@@ -21,5 +21,7 @@ namespace GP_LMS_ASP.Net8_Api.Models
         public int MonthNumber { get; set; }
         public int SessionsCount { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
+
+        public bool IsDeleted { get; set; }
     }
 }
