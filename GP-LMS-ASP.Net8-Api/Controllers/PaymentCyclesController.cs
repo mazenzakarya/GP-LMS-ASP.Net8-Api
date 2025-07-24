@@ -1,5 +1,6 @@
 ﻿using GP_LMS_ASP.Net8_Api.Context;
 using GP_LMS_ASP.Net8_Api.DTOs;
+using GP_LMS_ASP.Net8_Api.Helpers;
 using GP_LMS_ASP.Net8_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,21 +18,17 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             db = context;
         }
 
+        private readonly IPaymentCycleService _service;
+
+        public PaymentCyclesController(IPaymentCycleService service)
+        {
+            _service = service;
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddPaymentCycle(AddPaymentCycleDto dto)
         {
-            var cycle = new GroupPaymentCycle
-            {
-                GroupId = dto.GroupId,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-                MonthNumber = dto.MonthNumber,
-                SessionsCount = dto.SessionsCount
-            };
-
-            db.GroupPaymentCycles.Add(cycle);
-            await db.SaveChangesAsync();
-
+            var cycle = await _service.AddPaymentCycleAsync(dto);
             return Ok(cycle);
         }
 

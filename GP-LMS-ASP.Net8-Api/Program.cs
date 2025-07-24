@@ -4,9 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
+using Hangfire;
 using System;
 using Microsoft.OpenApi.Models;
+using GP_LMS_ASP.Net8_Api.Helpers;
 
 namespace GP_LMS_ASP.Net8_Api
 {
@@ -15,6 +16,14 @@ namespace GP_LMS_ASP.Net8_Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Add Hangfire services.
+            builder.Services.AddHangfire(x => x.UseSqlServerStorage(
+    builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddHangfireServer();
+
+            builder.Services.AddScoped<IPaymentCycleService, PaymentCycleService>();
 
             // Add services to the container.
             builder.Services.AddDbContext<MyContext>(options =>
@@ -98,6 +107,12 @@ namespace GP_LMS_ASP.Net8_Api
             app.UseAuthorization();
 
 
+            app.UseHangfireDashboard();
+
+            // Register recurring job (every day at 2 AM for example)
+            RecurringJob.AddOrUpdate<IPaymentCycleService>(
+                service => service.MarkStudentsAsUnpaidJob(),
+                Cron.Daily(2));
             app.Run();
         }
     }
