@@ -1,5 +1,6 @@
 ﻿using GP_LMS_ASP.Net8_Api.Context;
 using GP_LMS_ASP.Net8_Api.DTOs;
+using GP_LMS_ASP.Net8_Api.DTOs.AssignGroupTeacher;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,11 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
                 return Ok(students);
             }
+
+           
+           
+
+
 
         }
     }
