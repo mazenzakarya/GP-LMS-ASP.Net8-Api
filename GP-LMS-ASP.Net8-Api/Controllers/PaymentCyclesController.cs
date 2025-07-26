@@ -1,7 +1,6 @@
 ﻿using GP_LMS_ASP.Net8_Api.Context;
 using GP_LMS_ASP.Net8_Api.DTOs;
 using GP_LMS_ASP.Net8_Api.Helpers;
-using GP_LMS_ASP.Net8_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,16 +11,11 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
     public class PaymentCyclesController : ControllerBase
     {
         private readonly MyContext db;
-
-        public PaymentCyclesController(MyContext context)
-        {
-            db = context;
-        }
-
         private readonly IPaymentCycleService _service;
 
-        public PaymentCyclesController(IPaymentCycleService service)
+        public PaymentCyclesController(MyContext context, IPaymentCycleService service)
         {
+            db = context;
             _service = service;
         }
 
@@ -46,12 +40,11 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             return Ok(new { message = "Cycle soft deleted successfully" });
         }
 
-
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var cycles = await db.GroupPaymentCycles
-                .Where(c => !c.IsDeleted)
+
                 .ToListAsync();
 
             return Ok(cycles);
@@ -61,7 +54,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var cycle = await db.GroupPaymentCycles
-                .Where(c => c.GroupPaymentCycleId == id && !c.IsDeleted)
+                .Where(c => c.GroupPaymentCycleId == id)
                 .FirstOrDefaultAsync();
             if (cycle == null) return NotFound();
             return Ok(cycle);
@@ -86,13 +79,12 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         public async Task<IActionResult> GetByGroupId(int groupId)
         {
             var cycles = await db.GroupPaymentCycles
-                .Where(c => c.GroupId == groupId && !c.IsDeleted)
+                .Where(c => c.GroupId == groupId)
                 .ToListAsync();
             if (cycles == null || !cycles.Any()) return NotFound();
             return Ok(cycles);
-
-
         }
+
         [HttpGet("all")]
         public async Task<IActionResult> GetAllPaymentCycles()
         {
@@ -114,7 +106,5 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return Ok(cycles);
         }
-
-
     }
 }

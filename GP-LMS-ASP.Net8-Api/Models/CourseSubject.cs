@@ -6,8 +6,10 @@ namespace GP_LMS_ASP.Net8_Api.Models
     {
         public int CourseSubjectId { get; set; }
         public string Name { get; set; }
+
         [ForeignKey("Course")]
         public int CourseId { get; set; }
+
         public Course Course { get; set; }
 
         public bool IsDeleted { get; set; }

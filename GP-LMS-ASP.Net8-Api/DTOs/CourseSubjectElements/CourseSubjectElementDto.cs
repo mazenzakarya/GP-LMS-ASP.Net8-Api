@@ -36,5 +36,4 @@
         public DateTime DueDate { get; set; }
         public int TotalMarks { get; set; }
     }
-
 }

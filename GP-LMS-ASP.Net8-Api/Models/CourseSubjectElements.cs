@@ -8,9 +8,12 @@ namespace GP_LMS_ASP.Net8_Api.Models
 
         [ForeignKey("Subject")]
         public int SubjectId { get; set; }
+
         public CourseSubject Subject { get; set; }
+
         [ForeignKey("Course")]
         public int CourseId { get; set; }
+
         public Course Course { get; set; }
 
         public int GroupId { get; set; }

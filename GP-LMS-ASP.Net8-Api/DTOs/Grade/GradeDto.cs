@@ -25,5 +25,4 @@
         public int Score { get; set; }
         public string? Notes { get; set; }
     }
-
 }

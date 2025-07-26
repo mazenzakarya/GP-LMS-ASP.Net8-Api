@@ -1,11 +1,9 @@
-﻿using GP_LMS_ASP.Net8_Api.DTOs.Grade;
-using GP_LMS_ASP.Net8_Api.Models;
-using System;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using GP_LMS_ASP.Net8_Api.Context;
-using Microsoft.EntityFrameworkCore;
+﻿using GP_LMS_ASP.Net8_Api.Context;
 using GP_LMS_ASP.Net8_Api.DTOs.AssignGroupTeacher;
+using GP_LMS_ASP.Net8_Api.DTOs.Grade;
+using GP_LMS_ASP.Net8_Api.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GP_LMS_ASP.Net8_Api.Controllers
 {
@@ -89,6 +87,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return CreatedAtAction(nameof(GetGradesByStudent), new { studentId = grade.StudentId }, result);
         }
+
         //-----------------------assign teacher to group-------------
         [HttpPost("assign-teacher")]
         public async Task<IActionResult> AssignTeacherToGroup(AssignGroupTeacherDto dto)
@@ -106,7 +105,5 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return Ok(new { message = $"Teacher {teacher.Name} assigned to group {group.Name}" });
         }
-
     }
-
 }

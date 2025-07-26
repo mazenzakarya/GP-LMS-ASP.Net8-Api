@@ -6,6 +6,7 @@ namespace GP_LMS_ASP.Net8_Api.Helpers
     public interface IPaymentCycleService
     {
         Task<GroupPaymentCycle> AddPaymentCycleAsync(AddPaymentCycleDto dto);
+
         Task MarkStudentsAsUnpaidJob();
     }
 }

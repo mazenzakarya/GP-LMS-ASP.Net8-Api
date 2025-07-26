@@ -3,7 +3,6 @@ using GP_LMS_ASP.Net8_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
 [ApiController]
 [Route("api/[controller]")]
 public class StudentsController : ControllerBase
@@ -58,7 +57,6 @@ public class StudentsController : ControllerBase
         return Ok(new { message = "Student added", student.UserId });
     }
 
-
     // GET: api/students/{id}
     [HttpGet("{id}")]
     public async Task<ActionResult<StudentDTO>> GetStudentById(int id)
@@ -84,14 +82,8 @@ public class StudentsController : ControllerBase
         return Ok(student);
     }
 
-
-
-
-
     private string GenerateUsername(string name)
     {
         return name.ToLower().Replace(" ", "") + new Random().Next(100, 999);
     }
-
-    
 }
