@@ -20,6 +20,7 @@ public class StudentsController : ControllerBase
     {
         var students = await _context.Users
             .Where(u => u.Role == "Student" && !u.IsDeleted)
+            .Include(u => u.Parent)
             .Select(u => new StudentDTO
             {
                 UserId = u.UserId,
@@ -27,12 +28,17 @@ public class StudentsController : ControllerBase
                 Gender = u.Gender,
                 PhoneNumber = u.PhoneNumber,
                 DOB = u.DOB,
-                Address = u.Address
+                Address = u.Address,
+                ParentId = u.ParentId,
+                FatherName = u.Parent != null ? u.Parent.FatherName : null,
+                MotherName = u.Parent != null ? u.Parent.MotherName : null,
+                ParentPhoneNumber = u.Parent != null ? u.Parent.PhoneNumber : null
             })
             .ToListAsync();
 
         return Ok(students);
     }
+
 
     // POST: api/students
     [HttpPost]
@@ -63,6 +69,7 @@ public class StudentsController : ControllerBase
     {
         var student = await _context.Users
             .Where(u => u.Role == "Student" && u.UserId == id && !u.IsDeleted)
+            .Include(u => u.Parent)
             .Select(u => new StudentDTO
             {
                 UserId = u.UserId,
@@ -70,7 +77,11 @@ public class StudentsController : ControllerBase
                 Gender = u.Gender,
                 PhoneNumber = u.PhoneNumber,
                 DOB = u.DOB,
-                Address = u.Address
+                Address = u.Address,
+                ParentId = u.ParentId,
+                FatherName = u.Parent != null ? u.Parent.FatherName : null,
+                MotherName = u.Parent != null ? u.Parent.MotherName : null,
+                ParentPhoneNumber = u.Parent != null ? u.Parent.PhoneNumber : null
             })
             .FirstOrDefaultAsync();
 
@@ -82,8 +93,19 @@ public class StudentsController : ControllerBase
         return Ok(student);
     }
 
+
     private string GenerateUsername(string name)
     {
         return name.ToLower().Replace(" ", "") + new Random().Next(100, 999);
     }
+
+
+
+
+
+
+
+
+
+
 }
