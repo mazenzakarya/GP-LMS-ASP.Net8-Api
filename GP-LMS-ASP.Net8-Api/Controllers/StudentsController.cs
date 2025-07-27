@@ -124,6 +124,26 @@ public class StudentsController : ControllerBase
     }
 
 
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> SoftDeleteStudent(int id)
+    {
+        var student = await _context.Users
+            .FirstOrDefaultAsync(u => u.UserId == id && u.Role == "Student");
+
+        if (student == null)
+            return NotFound($"Student with ID {id} not found.");
+
+        if (student.IsDeleted)
+            return BadRequest("Student is already deleted.");
+
+        student.IsDeleted = true;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = $"Student with ID {id} has been soft deleted." });
+    }
+
+
+
 
     private string GenerateUsername(string name)
     {
