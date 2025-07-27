@@ -26,21 +26,14 @@ namespace GP_LMS_ASP.Net8_Api.Context
         {
             modelBuilder.Entity<Attendance>()
     .HasOne(a => a.Student)
-    .WithMany()
+    .WithMany(e => e.Attendances)
     .HasForeignKey(a => a.StudentId)
     .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<CourseSubjectElements>()
-                .HasOne(e => e.Course)
-                .WithMany()
-                .HasForeignKey(e => e.CourseId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<CourseSubjectElements>()
-                .HasOne(e => e.Group)
-                .WithMany()
-                .HasForeignKey(e => e.GroupId)
-                .OnDelete(DeleteBehavior.NoAction);
+    .HasOne(cse => cse.Group)
+    .WithMany(g => g.CourseSubjectElements)
+    .HasForeignKey(cse => cse.GroupId);
 
             base.OnModelCreating(modelBuilder);
 

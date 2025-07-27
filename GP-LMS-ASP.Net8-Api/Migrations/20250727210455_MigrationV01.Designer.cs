@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GP_LMS_ASP.Net8_Api.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20250726043246_MigrationV06")]
-    partial class MigrationV06
+    [Migration("20250727210455_MigrationV01")]
+    partial class MigrationV01
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -534,9 +534,9 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
                         .IsRequired();
 
                     b.HasOne("GP_LMS_ASP.Net8_Api.Models.Groups", "Group")
-                        .WithMany()
+                        .WithMany("CourseSubjectElements")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GP_LMS_ASP.Net8_Api.Models.Groups", null)
@@ -711,6 +711,8 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Groups", b =>
                 {
+                    b.Navigation("CourseSubjectElements");
+
                     b.Navigation("Elements");
 
                     b.Navigation("PaymentCycles");

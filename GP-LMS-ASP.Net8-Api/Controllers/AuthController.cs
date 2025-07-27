@@ -23,40 +23,32 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             _config = config;
         }
 
-        [Authorize]
-        [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDTO dto)
-        {
-            var requesterRole = User.FindFirst(ClaimTypes.Role).Value;
+        //[Authorize]
+        //[HttpPost("register")]
+        //public async Task<IActionResult> Register(RegisterDTO dto)
+        //{
+        //    var requesterRole = User.FindFirst(ClaimTypes.Role).Value;
 
-            if (requesterRole == null)
-                return Unauthorized("Invalid token");
+        // if (requesterRole == null) return Unauthorized("Invalid token");
 
-            if (dto.Role == "Admin" && requesterRole != "Admin")
-                return Forbid("Only Admin can create another Admin.");
+        // if (dto.Role == "Admin" && requesterRole != "Admin") return Forbid("Only Admin can create
+        // another Admin.");
 
-            if ((requesterRole == "Manager" || requesterRole == "Secretary") && dto.Role != "Student")
-                return Forbid("You are only allowed to create Student accounts.");
+        // if ((requesterRole == "Manager" || requesterRole == "Secretary") && dto.Role !=
+        // "Student") return Forbid("You are only allowed to create Student accounts.");
 
-            if (requesterRole == "Instructor" || requesterRole == "Student")
-                return Forbid("You are not allowed to register users.");
+        // if (requesterRole == "Instructor" || requesterRole == "Student") return Forbid("You are
+        // not allowed to register users.");
 
-            if (db.Users.Any(u => u.Username == dto.Username))
-                return BadRequest("Username already exists");
+        // if (db.Users.Any(u => u.Username == dto.Username)) return BadRequest("Username already exists");
 
-            var user = new User
-            {
-                Username = dto.Username,
-                Name = dto.Name,
-                Role = dto.Role,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
-            };
+        // var user = new User { Username = dto.Username, Name = dto.Name, Role = dto.Role,
+        // PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password) };
 
-            db.Users.Add(user);
-            db.SaveChanges();
+        // db.Users.Add(user); db.SaveChanges();
 
-            return Ok("User registered");
-        }
+        //    return Ok("User registered");
+        //}
 
         [HttpPost("login")]
         public IActionResult Login(LoginDTO dto)

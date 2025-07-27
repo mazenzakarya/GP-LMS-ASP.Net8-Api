@@ -22,7 +22,7 @@
         public bool IsDeleted { get; set; }
 
         public ICollection<StudentGroup> StudentGroups { get; set; } = new HashSet<StudentGroup>();
-        public ICollection<CourseSubjectElements> Elements { get; set; } = new HashSet<CourseSubjectElements>();
         public ICollection<GroupPaymentCycle> PaymentCycles { get; set; } = new HashSet<GroupPaymentCycle>();
+        public ICollection<CourseSubjectElements> CourseSubjectElements { get; set; } = new HashSet<CourseSubjectElements>();
     }
 }

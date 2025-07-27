@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GP_LMS_ASP.Net8_Api.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20250721025230_MigrationV03")]
-    partial class MigrationV03
+    [Migration("20250727211006_MigrationV02")]
+    partial class MigrationV02
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,7 +56,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Attendance");
+                    b.ToTable("Attendances");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Course", b =>
@@ -80,7 +80,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasKey("CourseId");
 
-                    b.ToTable("Course");
+                    b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.CourseSubject", b =>
@@ -105,7 +105,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("CourseSubject");
+                    b.ToTable("CourseSubjects");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.CourseSubjectElements", b =>
@@ -171,8 +171,14 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("Discount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("GroupId")
                         .HasColumnType("int");
@@ -196,6 +202,13 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedByUser")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("FeeId");
 
                     b.HasIndex("CourseId");
@@ -206,7 +219,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Fee");
+                    b.ToTable("Fees");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Grade", b =>
@@ -248,7 +261,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Grade");
+                    b.ToTable("Grades");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.GroupPaymentCycle", b =>
@@ -264,6 +277,9 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.Property<int>("GroupId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("MonthNumber")
                         .HasColumnType("int");
@@ -281,7 +297,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("GroupPaymentCycle");
+                    b.ToTable("GroupPaymentCycles");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Groups", b =>
@@ -351,7 +367,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasKey("LevelId");
 
-                    b.ToTable("Level");
+                    b.ToTable("Levels");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Parent", b =>
@@ -414,7 +430,7 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("StudentGroup");
+                    b.ToTable("StudentGroups");
                 });
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.User", b =>
@@ -514,13 +530,13 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
                     b.HasOne("GP_LMS_ASP.Net8_Api.Models.Course", "Course")
                         .WithMany()
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GP_LMS_ASP.Net8_Api.Models.Groups", "Group")
-                        .WithMany()
+                        .WithMany("CourseSubjectElements")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GP_LMS_ASP.Net8_Api.Models.Groups", null)
@@ -695,6 +711,8 @@ namespace GP_LMS_ASP.Net8_Api.Migrations
 
             modelBuilder.Entity("GP_LMS_ASP.Net8_Api.Models.Groups", b =>
                 {
+                    b.Navigation("CourseSubjectElements");
+
                     b.Navigation("Elements");
 
                     b.Navigation("PaymentCycles");
