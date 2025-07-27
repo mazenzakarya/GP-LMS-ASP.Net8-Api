@@ -1,4 +1,5 @@
 ﻿using GP_LMS_ASP.Net8_Api.Context;
+using GP_LMS_ASP.Net8_Api.DTOs;
 using GP_LMS_ASP.Net8_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -92,6 +93,36 @@ public class StudentsController : ControllerBase
 
         return Ok(student);
     }
+
+    [HttpPut("move-student")]
+    public async Task<IActionResult> MoveStudentToAnotherGroup([FromBody] MoveStudentGroupDTO dto)
+    {
+        // Check student exists
+        var student = await _context.Users
+            .FirstOrDefaultAsync(u => u.UserId == dto.StudentId && u.Role == "Student" && !u.IsDeleted);
+        if (student == null)
+            return NotFound($"Student with ID {dto.StudentId} not found.");
+
+        // Check new group exists
+        var newGroup = await _context.Groups.FindAsync(dto.NewGroupId);
+        if (newGroup == null)
+            return NotFound($"Group with ID {dto.NewGroupId} not found.");
+
+        // Find current group assignment
+        var studentGroup = await _context.StudentGroups
+            .FirstOrDefaultAsync(sg => sg.StudentId == dto.StudentId);
+        if (studentGroup == null)
+            return NotFound("This student is not assigned to any group.");
+
+        // Update the group
+        studentGroup.GroupId = dto.NewGroupId;
+
+        _context.StudentGroups.Update(studentGroup);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Student moved to new group successfully." });
+    }
+
 
 
     private string GenerateUsername(string name)
