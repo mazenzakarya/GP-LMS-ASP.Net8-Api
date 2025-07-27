@@ -97,7 +97,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             if (group == null || group.IsDeleted)
                 return NotFound("Group not found.");
 
-            var teacher = await _context.Users.FirstOrDefaultAsync(u => u.UserId == dto.TeacherId && u.Role == "Teacher" && !u.IsDeleted);
+            var teacher = await _context.Users.FirstOrDefaultAsync(u => u.UserId == dto.TeacherId && u.Role == "Instructor" && !u.IsDeleted);
             if (teacher == null)
                 return BadRequest("Invalid teacher.");
 
@@ -111,7 +111,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         public async Task<ActionResult<IEnumerable<TeacherWithGroupsDto>>> GetTeachersWithGroups()
         {
             var teachersWithGroups = await _context.Users
-                .Where(u => u.Role == "Teacher" && !u.IsDeleted)
+                .Where(u => u.Role == "Instructor" && !u.IsDeleted)
                 .Select(t => new TeacherWithGroupsDto
                 {
                     TeacherId = t.UserId,

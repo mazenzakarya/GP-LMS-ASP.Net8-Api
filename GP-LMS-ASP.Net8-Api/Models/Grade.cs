@@ -1,6 +1,4 @@
-﻿
-
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GP_LMS_ASP.Net8_Api.Models
 {
@@ -16,8 +14,10 @@ namespace GP_LMS_ASP.Net8_Api.Models
 
         public int CourseId { get; set; }
         public Course Course { get; set; }
+
         [ForeignKey("Element")]
         public int ElementId { get; set; }
+
         public CourseSubjectElements Element { get; set; }
 
         public int Score { get; set; }

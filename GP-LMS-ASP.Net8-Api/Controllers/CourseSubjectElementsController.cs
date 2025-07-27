@@ -1,9 +1,7 @@
-﻿using GP_LMS_ASP.Net8_Api.DTOs.CourseSubjectElements;
+﻿using GP_LMS_ASP.Net8_Api.Context;
+using GP_LMS_ASP.Net8_Api.DTOs.CourseSubjectElements;
 using GP_LMS_ASP.Net8_Api.Models;
-using System;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using GP_LMS_ASP.Net8_Api.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace GP_LMS_ASP.Net8_Api.Controllers
@@ -142,5 +140,4 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             return NoContent();
         }
     }
-
 }

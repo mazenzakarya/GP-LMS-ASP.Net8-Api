@@ -16,13 +16,9 @@ namespace GP_LMS_ASP.Net8_Api.DTOs
         public int MonthNumber { get; set; }
         public int SessionsCount { get; set; }
 
-
         public string CycleName { get; set; }
 
         public decimal Amount { get; set; }
         public bool IsActive { get; set; }
-
-
-
     }
 }

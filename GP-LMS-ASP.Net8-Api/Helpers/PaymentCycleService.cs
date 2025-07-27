@@ -5,15 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GP_LMS_ASP.Net8_Api.Helpers
 {
-    public class PaymentCycleService: IPaymentCycleService
+    public class PaymentCycleService : IPaymentCycleService
     {
         private readonly MyContext db;
 
-        public PaymentCycleService(MyContext _db)
+        public PaymentCycleService(MyContext db)
         {
-            _db = db; 
+            this.db = db;
         }
-
 
         public async Task<GroupPaymentCycle> AddPaymentCycleAsync(AddPaymentCycleDto dto)
         {
@@ -51,7 +50,4 @@ namespace GP_LMS_ASP.Net8_Api.Helpers
             await db.SaveChangesAsync();
         }
     }
-
-
 }
-

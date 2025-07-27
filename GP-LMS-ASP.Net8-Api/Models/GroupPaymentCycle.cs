@@ -1,5 +1,4 @@
-﻿
-namespace GP_LMS_ASP.Net8_Api.Models
+﻿namespace GP_LMS_ASP.Net8_Api.Models
 {
     public enum PaymentStatus
     {

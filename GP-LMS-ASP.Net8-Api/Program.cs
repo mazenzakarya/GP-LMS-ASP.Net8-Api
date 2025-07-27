@@ -1,13 +1,13 @@
-﻿
+﻿using System.Text;
+
 using GP_LMS_ASP.Net8_Api.Context;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Hangfire;
-using System;
-using Microsoft.OpenApi.Models;
 using GP_LMS_ASP.Net8_Api.Helpers;
+
+using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace GP_LMS_ASP.Net8_Api
 {
@@ -28,7 +28,6 @@ namespace GP_LMS_ASP.Net8_Api
             // Add services to the container.
             builder.Services.AddDbContext<MyContext>(options =>
               options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
             //swagger stuff
             builder.Services.AddSwaggerGen(options =>
@@ -61,7 +60,7 @@ namespace GP_LMS_ASP.Net8_Api
             });
 
             //jwt stuff
-            var key = Encoding.ASCII.GetBytes("ThisIsAVeryStrongSecretKeyForJwt123asdsae@@ad...!"); 
+            var key = Encoding.ASCII.GetBytes("ThisIsAVeryStrongSecretKeyForJwt123asdsae@@ad...!");
 
             builder.Services.AddAuthentication(options =>
             {
@@ -82,7 +81,6 @@ namespace GP_LMS_ASP.Net8_Api
                 };
             });
 
-
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -98,14 +96,11 @@ namespace GP_LMS_ASP.Net8_Api
 
             app.UseHttpsRedirection();
 
-
-
             app.MapControllers();
 
             //auth for jwt
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.UseHangfireDashboard();
 
@@ -113,6 +108,12 @@ namespace GP_LMS_ASP.Net8_Api
             RecurringJob.AddOrUpdate<IPaymentCycleService>(
                 service => service.MarkStudentsAsUnpaidJob(),
                 Cron.Daily(2));
+
+            RecurringJob.AddOrUpdate<FeeStatusUpdater>(
+    "update-fee-status",
+    updater => updater.UpdateFeeStatusesAsync(),
+   Cron.Daily(2)
+);
             app.Run();
         }
     }

@@ -1,9 +1,7 @@
-﻿using GP_LMS_ASP.Net8_Api.DTOs.CourseSubject;
+﻿using GP_LMS_ASP.Net8_Api.Context;
+using GP_LMS_ASP.Net8_Api.DTOs.CourseSubject;
 using GP_LMS_ASP.Net8_Api.Models;
-using System;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using GP_LMS_ASP.Net8_Api.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace GP_LMS_ASP.Net8_Api.Controllers
@@ -61,7 +59,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         [HttpPost]
         public async Task<ActionResult<CourseSubjectDto>> CreateCourseSubject(CourseSubjectCreateDto dto)
         {
-            // Optional: cheak if course not exsit 
+            // Optional: cheak if course not exsit
             var courseExists = await _context.Courses.AnyAsync(c => c.CourseId == dto.CourseId && !c.IsDeleted);
             if (!courseExists)
                 return BadRequest("Course not found.");
@@ -94,7 +92,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             if (subject == null || subject.IsDeleted)
                 return NotFound();
 
-            // Optional: cheak if new course not exsit 
+            // Optional: cheak if new course not exsit
             var courseExists = await _context.Courses.AnyAsync(c => c.CourseId == dto.CourseId && !c.IsDeleted);
             if (!courseExists)
                 return BadRequest("Course not found.");
@@ -120,5 +118,4 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             return NoContent();
         }
     }
-
 }
