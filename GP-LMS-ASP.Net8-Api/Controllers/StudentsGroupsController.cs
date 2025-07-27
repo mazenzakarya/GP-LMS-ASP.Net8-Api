@@ -10,11 +10,11 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
     [ApiController]
     public class StudentsGroupsController : ControllerBase
     {
-        public class StudentsController : ControllerBase
-        {
+        
+        
             private readonly MyContext _context;
 
-            public StudentsController(MyContext context)
+            public StudentsGroupsController(MyContext context)
             {
                 _context = context;
             }
@@ -86,4 +86,3 @@ public async Task<ActionResult<IEnumerable<GroupStudentDTO>>> GetStudentsInGroup
 
         }
     }
-}
