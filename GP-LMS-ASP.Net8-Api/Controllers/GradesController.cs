@@ -106,6 +106,60 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return Ok(new { message = $"Teacher {teacher.Name} assigned to group {group.Name}" });
         }
+        //-----------------------get group teacher-------------
+        [HttpGet("teachers-with-groups")]
+        public async Task<ActionResult<IEnumerable<TeacherWithGroupsDto>>> GetTeachersWithGroups()
+        {
+            var teachersWithGroups = await _context.Users
+                .Where(u => u.Role == "Teacher" && !u.IsDeleted)
+                .Select(t => new TeacherWithGroupsDto
+                {
+                    TeacherId = t.UserId,
+                    TeacherName = t.Name,
+                    GroupNames = t.StudentGroups
+                        .Where(sg => sg.Group != null && !sg.Group.IsDeleted)
+                        .Select(sg => sg.Group.Name)
+                        .Distinct()
+                        .ToList()
+                })
+                .ToListAsync();
+
+            if (teachersWithGroups.All(t => t.GroupNames.Count == 0))
+            {
+                teachersWithGroups = await _context.Groups
+                    .Where(g => !g.IsDeleted)
+                    .Include(g => g.Teacher)
+                    .GroupBy(g => g.Teacher)
+                    .Select(g => new TeacherWithGroupsDto
+                    {
+                        TeacherId = g.Key.UserId,
+                        TeacherName = g.Key.Name,
+                        GroupNames = g.Select(x => x.Name).ToList()
+                    })
+                    .ToListAsync();
+            }
+
+            return Ok(teachersWithGroups);
+        }
+        //-----------------------get group students by teacher id-------------
+        [HttpGet("teacher/{teacherId}")]
+        public async Task<ActionResult<IEnumerable<GroupBriefDto>>> GetGroupsByTeacher(int teacherId)
+        {
+            var groups = await _context.Groups
+                .Where(g => g.TeacherId == teacherId && !g.IsDeleted)
+                .Include(g => g.Course)
+                .Select(g => new GroupBriefDto
+                {
+                    GroupId = g.GroupsId,
+                    GroupName = g.Name,
+                    CourseName = g.Course.Name,
+                    StartDate = g.LevelStartDate
+                })
+                .ToListAsync();
+
+            return Ok(groups);
+        }
+
 
     }
 
