@@ -1,9 +1,11 @@
-﻿using GP_LMS_ASP.Net8_Api.Context;
-using GP_LMS_ASP.Net8_Api.DTOs.AssignGroupTeacher;
-using GP_LMS_ASP.Net8_Api.DTOs.Grade;
+﻿using GP_LMS_ASP.Net8_Api.DTOs.Grade;
 using GP_LMS_ASP.Net8_Api.Models;
+using System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using GP_LMS_ASP.Net8_Api.Context;
 using Microsoft.EntityFrameworkCore;
+using GP_LMS_ASP.Net8_Api.DTOs.AssignGroupTeacher;
 
 namespace GP_LMS_ASP.Net8_Api.Controllers
 {
@@ -87,7 +89,6 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return CreatedAtAction(nameof(GetGradesByStudent), new { studentId = grade.StudentId }, result);
         }
-
         //-----------------------assign teacher to group-------------
         [HttpPost("assign-teacher")]
         public async Task<IActionResult> AssignTeacherToGroup(AssignGroupTeacherDto dto)
@@ -96,7 +97,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             if (group == null || group.IsDeleted)
                 return NotFound("Group not found.");
 
-            var teacher = await _context.Users.FirstOrDefaultAsync(u => u.UserId == dto.TeacherId && u.Role == "Teacher" && !u.IsDeleted);
+            var teacher = await _context.Users.FirstOrDefaultAsync(u => u.UserId == dto.TeacherId && u.Role == "Instructor" && !u.IsDeleted);
             if (teacher == null)
                 return BadRequest("Invalid teacher.");
 
@@ -105,5 +106,61 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return Ok(new { message = $"Teacher {teacher.Name} assigned to group {group.Name}" });
         }
+        //-----------------------get group teacher-------------
+        [HttpGet("teachers-with-groups")]
+        public async Task<ActionResult<IEnumerable<TeacherWithGroupsDto>>> GetTeachersWithGroups()
+        {
+            var teachersWithGroups = await _context.Users
+                .Where(u => u.Role == "Instructor" && !u.IsDeleted)
+                .Select(t => new TeacherWithGroupsDto
+                {
+                    TeacherId = t.UserId,
+                    TeacherName = t.Name,
+                    GroupNames = t.StudentGroups
+                        .Where(sg => sg.Group != null && !sg.Group.IsDeleted)
+                        .Select(sg => sg.Group.Name)
+                        .Distinct()
+                        .ToList()
+                })
+                .ToListAsync();
+
+            if (teachersWithGroups.All(t => t.GroupNames.Count == 0))
+            {
+                teachersWithGroups = await _context.Groups
+                    .Where(g => !g.IsDeleted)
+                    .Include(g => g.Teacher)
+                    .GroupBy(g => g.Teacher)
+                    .Select(g => new TeacherWithGroupsDto
+                    {
+                        TeacherId = g.Key.UserId,
+                        TeacherName = g.Key.Name,
+                        GroupNames = g.Select(x => x.Name).ToList()
+                    })
+                    .ToListAsync();
+            }
+
+            return Ok(teachersWithGroups);
+        }
+        //-----------------------get group students by teacher id-------------
+        [HttpGet("teacher/{teacherId}")]
+        public async Task<ActionResult<IEnumerable<GroupBriefDto>>> GetGroupsByTeacher(int teacherId)
+        {
+            var groups = await _context.Groups
+                .Where(g => g.TeacherId == teacherId && !g.IsDeleted)
+                .Include(g => g.Course)
+                .Select(g => new GroupBriefDto
+                {
+                    GroupId = g.GroupsId,
+                    GroupName = g.Name,
+                    CourseName = g.Course.Name,
+                    StartDate = g.LevelStartDate
+                })
+                .ToListAsync();
+
+            return Ok(groups);
+        }
+
+
     }
+
 }
