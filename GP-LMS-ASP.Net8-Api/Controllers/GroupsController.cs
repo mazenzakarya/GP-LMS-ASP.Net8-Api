@@ -10,80 +10,137 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
     [ApiController]
     public class GroupsController : ControllerBase
     {
-        public class StudentsController : ControllerBase
+        private readonly MyContext _context;
+
+        public GroupsController(MyContext context)
         {
-            private readonly MyContext _context;
+            _context = context;
+        }
 
-            public StudentsController(MyContext context)
-            {
-                _context = context;
-            }
-
-           [HttpGet("{groupId}/students")]
-public async Task<ActionResult<IEnumerable<GroupStudentDTO>>> GetStudentsInGroup(int groupId)
-{
-    var students = await _context.StudentGroups
-        .Where(sg => sg.GroupId == groupId
-                     && sg.Student.Role == "Student"
-                     && !sg.Student.IsDeleted)
-        .Select(sg => new GroupStudentDTO
+        // GET: api/groups 
+        //Get all groups
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<GroupDTO>>> GetAllGroups()
         {
-            UserId = sg.Student.UserId,
-            Name = sg.Student.Name,
-            Gender = sg.Student.Gender,
-            PhoneNumber = sg.Student.PhoneNumber,
-            DOB = sg.Student.DOB,
-            Address = sg.Student.Address,
-            PaymentStatus = sg.PaymentStatus,
+            var groups = await _context.Groups
+                .Where(g => !g.IsDeleted)
+                .Include(g => g.Course)
+                .Include(g => g.Level)
+                .Include(g => g.Teacher)
+                .Select(g => new GroupDTO
+                {
+                    GroupsId = g.GroupsId,
+                    Name = g.Name,
+                    CourseId = g.CourseId,
+                    CourseName = g.Course.Name,
+                    LevelId = g.LevelId,
+                    LevelName = g.Level.Name,
+                    TeacherId = g.TeacherId,
+                    TeacherName = g.Teacher.Name,
+                    Amount = g.Amount,
+                    LevelStartDate = g.LevelStartDate,
+                    LevelEndDate = g.LevelEndDate,
+                    NextPaymentDate = g.NextPaymentDate,
+                    IsDeleted = g.IsDeleted
+                })
+                .ToListAsync();
 
-            // Parent Info
-            ParentId = sg.Student.ParentId,
-            FatherName = sg.Student.Parent.FatherName,
-            MotherName = sg.Student.Parent.MotherName,
-            ParentPhoneNumber = sg.Student.Parent.PhoneNumber
-        })
-        .ToListAsync();
+            return Ok(groups);
+        }
 
-        if (students == null || students.Count == 0)
-        return NotFound($"No students found in group ID {groupId}");
+        // GET: api/groups/5
+        //Get group by id
+        [HttpGet("{id}")]
+        public async Task<ActionResult<GroupDTO>> GetGroupById(int id)
+        {
+            var group = await _context.Groups
+                .Where(g => g.GroupsId == id && !g.IsDeleted)
+                .Include(g => g.Course)
+                .Include(g => g.Level)
+                .Include(g => g.Teacher)
+                .Select(g => new GroupDTO
+                {
+                    GroupsId = g.GroupsId,
+                    Name = g.Name,
+                    CourseId = g.CourseId,
+                    CourseName = g.Course.Name,
+                    LevelId = g.LevelId,
+                    LevelName = g.Level.Name,
+                    TeacherId = g.TeacherId,
+                    TeacherName = g.Teacher.Name,
+                    Amount = g.Amount,
+                    LevelStartDate = g.LevelStartDate,
+                    LevelEndDate = g.LevelEndDate,
+                    NextPaymentDate = g.NextPaymentDate,
+                    IsDeleted = g.IsDeleted
+                })
+                .FirstOrDefaultAsync();
 
-        return Ok(students);
-    }
+            if (group == null)
+                return NotFound(new { message = "Group not found." });
 
-            [HttpPost("assign-students")]
-            public async Task<IActionResult> AssignStudentsToGroup([FromBody] AssginStudentsGroupDTO dto)
+            return Ok(group);
+        }
+
+        // POST: api/groups
+        //Add group
+        [HttpPost]
+        public async Task<ActionResult> CreateGroup(GroupDTO dto)
+        {
+            var group = new Groups
             {
-                if (!await _context.Groups.AnyAsync(g => g.GroupsId == dto.GroupId))
-                    return NotFound($"Group with ID {dto.GroupId} not found.");
+                Name = dto.Name,
+                CourseId = dto.CourseId,
+                LevelId = dto.LevelId,
+                TeacherId = dto.TeacherId,
+                Amount = dto.Amount,
+                LevelStartDate = dto.LevelStartDate,
+                LevelEndDate = dto.LevelEndDate,
+                NextPaymentDate = dto.NextPaymentDate,
+                IsDeleted = false
+            };
 
-                var validStudents = await _context.Users
-                    .Where(u => dto.StudentIds.Contains(u.UserId) && u.Role == "Student" && !u.IsDeleted)
-                    .ToListAsync();
+            _context.Groups.Add(group);
+            await _context.SaveChangesAsync();
 
-                if (!validStudents.Any())
-                    return BadRequest("No valid students found to assign.");
+            return Ok(new { message = "Group created successfully", groupId = group.GroupsId });
+        }
 
-                var existingAssignments = await _context.StudentGroups
-                    .Where(sg => sg.GroupId == dto.GroupId && dto.StudentIds.Contains(sg.StudentId))
-                    .ToListAsync();
+        // PUT: api/groups/5
+        //Update group
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateGroup(int id, GroupDTO dto)
+        {
+            var group = await _context.Groups.FindAsync(id);
+            if (group == null || group.IsDeleted)
+                return NotFound(new { message = "Group not found." });
 
-                var newAssignments = validStudents
-                    .Where(s => !existingAssignments.Any(ea => ea.StudentId == s.UserId))
-                    .Select(s => new StudentGroup
-                    {
-                        GroupId = dto.GroupId,
-                        StudentId = s.UserId,
-                        PaymentStatus = "Unpaid" // or default
-                    })
-                    .ToList();
+            group.Name = dto.Name;
+            group.CourseId = dto.CourseId;
+            group.LevelId = dto.LevelId;
+            group.TeacherId = dto.TeacherId;
+            group.Amount = dto.Amount;
+            group.LevelStartDate = dto.LevelStartDate;
+            group.LevelEndDate = dto.LevelEndDate;
+            group.NextPaymentDate = dto.NextPaymentDate;
 
-                _context.StudentGroups.AddRange(newAssignments);
-                await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Group updated successfully" });
+        }
 
-                return Ok(new { message = "Students assigned successfully", assignedCount = newAssignments.Count });
-            }
+        // DELETE: api/groups/5
+        //Soft delte a group
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteGroup(int id)
+        {
+            var group = await _context.Groups.FindAsync(id);
+            if (group == null || group.IsDeleted)
+                return NotFound(new { message = "Group not found." });
 
+            group.IsDeleted = true;
+            await _context.SaveChangesAsync();
 
+            return Ok(new { message = "Group deleted (soft delete)." });
         }
     }
 }
