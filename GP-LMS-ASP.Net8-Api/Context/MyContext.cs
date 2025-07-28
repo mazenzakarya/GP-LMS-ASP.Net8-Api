@@ -12,9 +12,7 @@ namespace GP_LMS_ASP.Net8_Api.Context
         public DbSet<User> Users { get; set; }
         public DbSet<Parent> Parents { get; set; }
         public DbSet<StudentGroup> StudentGroups { get; set; }
-        public DbSet<Level> Levels { get; set; }
         public DbSet<Groups> Groups { get; set; }
-        public DbSet<GroupPaymentCycle> GroupPaymentCycles { get; set; }
         public DbSet<Grade> Grades { get; set; }
         public DbSet<Fee> Fees { get; set; }
         public DbSet<CourseSubjectElements> CourseSubjectElements { get; set; }
@@ -41,7 +39,6 @@ namespace GP_LMS_ASP.Net8_Api.Context
             modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<Parent>().HasQueryFilter(p => !p.IsDeleted);
             modelBuilder.Entity<Course>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<Level>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Groups>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<CourseSubject>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<CourseSubjectElements>().HasQueryFilter(e => !e.IsDeleted);

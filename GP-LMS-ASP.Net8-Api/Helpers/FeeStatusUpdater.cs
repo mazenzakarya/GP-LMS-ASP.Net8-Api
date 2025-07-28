@@ -16,7 +16,7 @@ namespace GP_LMS_ASP.Net8_Api.Helpers
         public async Task UpdateFeeStatusesAsync()
         {
             var monthlyFees = await db.Fees
-                .Where(f => f.Type == FeeType.Monthly && f.Status == FeeStatus.Paid && !f.IsDeleted)
+                .Where(f => f.Type == FeeType.Monthly && f.Status == FeeStatus.Paid)
                 .Include(f => f.Student)
                 .ToListAsync();
 
@@ -29,10 +29,9 @@ namespace GP_LMS_ASP.Net8_Api.Helpers
                              && a.Date > fee.Date)
                     .CountAsync();
 
-                bool expiredByDate = DateTime.UtcNow > fee.Date.AddDays(28);
                 bool expiredByAttendance = attendanceCount >= 4;
 
-                if (expiredByDate || expiredByAttendance)
+                if (expiredByAttendance)
                 {
                     fee.Status = FeeStatus.Unpaid;
                 }

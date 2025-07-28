@@ -9,11 +9,13 @@ namespace GP_LMS_ASP.Net8_Api.Models
         [ForeignKey("Student")]
         public int StudentId { get; set; }
 
-        public User Student { get; set; }
+        public virtual User Student { get; set; }
 
         public int GroupId { get; set; }
-        public Groups Group { get; set; }
+        public virtual Groups Group { get; set; }
 
         public string PaymentStatus { get; set; } // Paid, Unpaid
+
+        public DateTime LastPaymentDate { get; set; }
     }
 }

@@ -38,7 +38,6 @@
         public virtual Course Course { get; set; }
 
         public int PaymentCycleId { get; set; }
-        public virtual GroupPaymentCycle PaymentCycle { get; set; }
 
         public string UpdatedByUser { get; set; }
 

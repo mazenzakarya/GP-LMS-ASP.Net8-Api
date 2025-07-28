@@ -18,9 +18,8 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             _context = context;
         }
 
-        //mark attendace 
-        [HttpPost("mark")] 
-
+        //mark attendace
+        [HttpPost("mark")]
         public async Task<IActionResult> MarkAttendance([FromBody] List<AttendanceDTO> attendanceList)
         {
             foreach (var item in attendanceList)
@@ -45,6 +44,21 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            var studentId = attendanceList[0].StudentId;
+            var groupId = attendanceList[0].GroupId;
+
+            var sessionsCount = await _context.Attendances
+                .Where(a => a.StudentId == studentId && a.GroupId == groupId && a.Date.Date == DateTime.Now.Date)
+                .CountAsync();
+
+            var isFourthSession = sessionsCount % 4 == 0;
+            if (isFourthSession)
+            {
+                await _context.StudentGroups.Where(sg => sg.GroupId == groupId).ExecuteUpdateAsync(setters => setters
+                .SetProperty(sg => sg.PaymentStatus, "unpaid"));
+            }
+
             return Ok("Attendance marked successfully.");
         }
 
@@ -82,8 +96,5 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return Ok(attendance);
         }
-
-
-
     }
 }

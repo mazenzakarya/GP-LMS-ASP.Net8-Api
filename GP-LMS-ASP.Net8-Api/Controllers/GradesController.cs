@@ -89,6 +89,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return CreatedAtAction(nameof(GetGradesByStudent), new { studentId = grade.StudentId }, result);
         }
+
         //-----------------------assign teacher to group-------------
         [HttpPost("assign-teacher")]
         public async Task<IActionResult> AssignTeacherToGroup(AssignGroupTeacherDto dto)
@@ -97,7 +98,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             if (group == null || group.IsDeleted)
                 return NotFound("Group not found.");
 
-            var teacher = await _context.Users.FirstOrDefaultAsync(u => u.UserId == dto.TeacherId && u.Role == "Instructor" && !u.IsDeleted);
+            var teacher = await _context.Users.FirstOrDefaultAsync(u => u.UserId == dto.TeacherId && u.Role == "Instructor");
             if (teacher == null)
                 return BadRequest("Invalid teacher.");
 
@@ -106,6 +107,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return Ok(new { message = $"Teacher {teacher.Name} assigned to group {group.Name}" });
         }
+
         //-----------------------get group teacher-------------
         [HttpGet("teachers-with-groups")]
         public async Task<ActionResult<IEnumerable<TeacherWithGroupsDto>>> GetTeachersWithGroups()
@@ -117,7 +119,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                     TeacherId = t.UserId,
                     TeacherName = t.Name,
                     GroupNames = t.StudentGroups
-                        .Where(sg => sg.Group != null && !sg.Group.IsDeleted)
+                        .Where(sg => sg.Group != null)
                         .Select(sg => sg.Group.Name)
                         .Distinct()
                         .ToList()
@@ -127,7 +129,6 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             if (teachersWithGroups.All(t => t.GroupNames.Count == 0))
             {
                 teachersWithGroups = await _context.Groups
-                    .Where(g => !g.IsDeleted)
                     .Include(g => g.Teacher)
                     .GroupBy(g => g.Teacher)
                     .Select(g => new TeacherWithGroupsDto
@@ -141,12 +142,13 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return Ok(teachersWithGroups);
         }
+
         //-----------------------get group students by teacher id-------------
         [HttpGet("teacher/{teacherId}")]
         public async Task<ActionResult<IEnumerable<GroupBriefDto>>> GetGroupsByTeacher(int teacherId)
         {
             var groups = await _context.Groups
-                .Where(g => g.TeacherId == teacherId && !g.IsDeleted)
+                .Where(g => g.TeacherId == teacherId)
                 .Include(g => g.Course)
                 .Select(g => new GroupBriefDto
                 {
@@ -160,7 +162,32 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             return Ok(groups);
         }
 
+        //new api to get grades by group and student id
+        // GET: api/Grades/student/5/group/3
+        [HttpGet("student/{studentId}/group/{groupId}")]
+        public async Task<ActionResult<IEnumerable<GradeDto>>> GetGradesByStudentInGroup(int studentId, int groupId)
+        {
+            var grades = await _context.Grades
+                .Where(g => g.StudentId == studentId && g.Element.GroupId == groupId)
+                .Include(g => g.Student)
+                .Include(g => g.Element)
+                .Include(g => g.Subject)
+                .Select(g => new GradeDto
+                {
+                    GradeId = g.GradeId,
+                    StudentId = g.StudentId,
+                    StudentName = g.Student.Name,
+                    CourseId = g.CourseId,
+                    SubjectId = g.SubjectId,
+                    ElementId = g.ElementId,
+                    ElementDescription = g.Element.Description,
+                    Score = g.Score,
+                    Notes = g.Notes,
+                    GradedAt = g.GradedAt
+                })
+                .ToListAsync();
 
+            return Ok(grades);
+        }
     }
-
 }

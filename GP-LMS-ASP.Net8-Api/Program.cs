@@ -17,13 +17,25 @@ namespace GP_LMS_ASP.Net8_Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    policy =>
+                    {
+                        policy
+                            .AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+            });
+
             // Add Hangfire services.
             builder.Services.AddHangfire(x => x.UseSqlServerStorage(
     builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddHangfireServer();
 
-            builder.Services.AddScoped<IPaymentCycleService, PaymentCycleService>();
+            //builder.Services.AddScoped<IPaymentCycleService>();
 
             // Add services to the container.
             builder.Services.AddDbContext<MyContext>(options =>
@@ -101,19 +113,19 @@ namespace GP_LMS_ASP.Net8_Api
             //auth for jwt
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseCors("AllowAll");
             app.UseHangfireDashboard();
 
-            // Register recurring job (every day at 2 AM for example)
-            RecurringJob.AddOrUpdate<IPaymentCycleService>(
-                service => service.MarkStudentsAsUnpaidJob(),
-                Cron.Daily(2));
+            //// Register recurring job (every day at 2 AM for example)
+            //RecurringJob.AddOrUpdate<IPaymentCycleService>(
+            //    service => service.MarkStudentsAsUnpaidJob(),
+            //    Cron.Daily(2));
 
-            RecurringJob.AddOrUpdate<FeeStatusUpdater>(
-    "update-fee-status",
-    updater => updater.UpdateFeeStatusesAsync(),
-   Cron.Daily(2)
-);
+            //         RecurringJob.AddOrUpdate<FeeStatusUpdater>(
+            // "update-fee-status",
+            // updater => updater.UpdateFeeStatusesAsync(),
+            //Cron.Daily(2)
+            //);
             app.Run();
         }
     }

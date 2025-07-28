@@ -17,7 +17,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             _context = context;
         }
 
-        // GET: api/groups 
+        // GET: api/groups
         //Get all groups
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GroupDTO>>> GetAllGroups()
@@ -25,7 +25,6 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             var groups = await _context.Groups
                 .Where(g => !g.IsDeleted)
                 .Include(g => g.Course)
-                .Include(g => g.Level)
                 .Include(g => g.Teacher)
                 .Select(g => new GroupDTO
                 {
@@ -33,11 +32,11 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                     Name = g.Name,
                     CourseId = g.CourseId,
                     CourseName = g.Course.Name,
-                    LevelId = g.LevelId,
-                    LevelName = g.Level.Name,
                     TeacherId = g.TeacherId,
                     TeacherName = g.Teacher.Name,
                     Amount = g.Amount,
+                    LevelDescription = g.Course.Description,
+
                     LevelStartDate = g.LevelStartDate,
                     LevelEndDate = g.LevelEndDate,
                     NextPaymentDate = g.NextPaymentDate,
@@ -54,26 +53,25 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         public async Task<ActionResult<GroupDTO>> GetGroupById(int id)
         {
             var group = await _context.Groups
-                .Where(g => g.GroupsId == id && !g.IsDeleted)
+                .Where(g => g.GroupsId == id)
                 .Include(g => g.Course)
-                .Include(g => g.Level)
                 .Include(g => g.Teacher)
-                .Select(g => new GroupDTO
-                {
-                    GroupsId = g.GroupsId,
-                    Name = g.Name,
-                    CourseId = g.CourseId,
-                    CourseName = g.Course.Name,
-                    LevelId = g.LevelId,
-                    LevelName = g.Level.Name,
-                    TeacherId = g.TeacherId,
-                    TeacherName = g.Teacher.Name,
-                    Amount = g.Amount,
-                    LevelStartDate = g.LevelStartDate,
-                    LevelEndDate = g.LevelEndDate,
-                    NextPaymentDate = g.NextPaymentDate,
-                    IsDeleted = g.IsDeleted
-                })
+               .Select(g => new GroupDTO
+               {
+                   GroupsId = g.GroupsId,
+                   Name = g.Name,
+                   CourseId = g.CourseId,
+                   CourseName = g.Course.Name,
+                   LevelDescription = g.Course.Description, //added description instead of Level
+                   TeacherId = g.TeacherId,
+                   TeacherName = g.Teacher.Name,
+                   Amount = g.Amount,
+                   LevelStartDate = g.LevelStartDate,
+                   LevelEndDate = g.LevelEndDate,
+                   NextPaymentDate = g.NextPaymentDate,
+                   IsDeleted = g.IsDeleted
+               })
+
                 .FirstOrDefaultAsync();
 
             if (group == null)
@@ -91,7 +89,6 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             {
                 Name = dto.Name,
                 CourseId = dto.CourseId,
-                LevelId = dto.LevelId,
                 TeacherId = dto.TeacherId,
                 Amount = dto.Amount,
                 LevelStartDate = dto.LevelStartDate,
@@ -117,7 +114,6 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             group.Name = dto.Name;
             group.CourseId = dto.CourseId;
-            group.LevelId = dto.LevelId;
             group.TeacherId = dto.TeacherId;
             group.Amount = dto.Amount;
             group.LevelStartDate = dto.LevelStartDate;

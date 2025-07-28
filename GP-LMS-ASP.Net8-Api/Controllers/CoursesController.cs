@@ -108,5 +108,23 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return NoContent();
         }
+
+        //added new for chose course name and level description in create group
+        // GET: api/courses/options
+        [HttpGet("options")]
+        public async Task<ActionResult<IEnumerable<CourseCreateDto>>> GetCourseOptions()
+        {
+            var courses = await _context.Courses
+                .Where(c => !c.IsDeleted)
+                .Select(c => new CourseCreateDto
+                {
+                    CourseId = c.CourseId,
+                    Name = c.Name,
+                    Description = c.Description
+                })
+                .ToListAsync();
+
+            return Ok(courses);
+        }
     }
 }
