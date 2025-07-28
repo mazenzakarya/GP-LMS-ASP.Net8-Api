@@ -1,5 +1,7 @@
-﻿using GP_LMS_ASP.Net8_Api.Context;
+﻿using System.Text.RegularExpressions;
+using GP_LMS_ASP.Net8_Api.Context;
 using GP_LMS_ASP.Net8_Api.DTOs;
+using GP_LMS_ASP.Net8_Api.Helpers;
 using GP_LMS_ASP.Net8_Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +27,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             foreach (var item in attendanceList)
             {
                 var existing = await _context.Attendances
-                    .FirstOrDefaultAsync(a => a.StudentId == item.StudentId && a.GroupId == item.GroupId && a.Date.Date == item.Date.Date);
+                    .FirstOrDefaultAsync(a => a.StudentId == item.StudentId && a.GroupId == item.GroupId && !a.IsExcepctionSession);
 
                 if (existing != null)
                 {
@@ -38,26 +40,16 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                         StudentId = item.StudentId,
                         GroupId = item.GroupId,
                         Date = item.Date.Date,
-                        Status = item.Status
+                        Status = item.Status,
+                        IsExcepctionSession = item.IsExcepctionSession
                     });
                 }
             }
-
-            await _context.SaveChangesAsync();
-
             var studentId = attendanceList[0].StudentId;
             var groupId = attendanceList[0].GroupId;
-
-            var sessionsCount = await _context.Attendances
-                .Where(a => a.StudentId == studentId && a.GroupId == groupId && a.Date.Date == DateTime.Now.Date)
-                .CountAsync();
-
-            var isFourthSession = sessionsCount % 4 == 0;
-            if (isFourthSession)
-            {
-                await _context.StudentGroups.Where(sg => sg.GroupId == groupId).ExecuteUpdateAsync(setters => setters
-                .SetProperty(sg => sg.PaymentStatus, "unpaid"));
-            }
+            await _context.SaveChangesAsync();
+            var updater = new FeeStatusUpdater(_context);
+            await updater.UpdateFeeStatusesAsync(studentId, groupId);
 
             return Ok("Attendance marked successfully.");
         }
@@ -91,6 +83,43 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                     a.Date,
                     a.Group.Name,
                     a.Status
+                })
+                .ToListAsync();
+
+            return Ok(attendance);
+        }
+
+        //get student ExcepctionSession attendance -may be not needed now-
+        [HttpGet("student/{studentId}/ExcepctionSession")]
+        public async Task<IActionResult> GetStudentMakeupAttendance(int studentId)
+        {
+            var ex = await _context.Attendances
+                .Where(a => a.StudentId == studentId && a.IsExcepctionSession)
+                .OrderByDescending(a => a.Date)
+                .Select(a => new
+                {
+                    a.Date,
+                    a.Group.Name,
+                    a.Status
+                })
+                .ToListAsync();
+
+            return Ok(ex);
+        }
+
+        //full report with ex session
+        [HttpGet("student-absenbt-report/{studentId}")]
+        public async Task<IActionResult> GetFullReportStudentAttendance(int studentId)
+        {
+            var attendance = await _context.Attendances
+                .Where(a => a.StudentId == studentId)
+                .OrderByDescending(a => a.Date)
+                .Select(a => new
+                {
+                    a.Date,
+                    GroupName = a.Group.Name,
+                    a.Status,
+                    a.IsExcepctionSession
                 })
                 .ToListAsync();
 

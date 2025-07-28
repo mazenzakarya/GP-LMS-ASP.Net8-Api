@@ -8,5 +8,6 @@ namespace GP_LMS_ASP.Net8_Api.DTOs
         public int GroupId { get; set; }
         public DateTime Date { get; set; }
         public AttendanceStatus Status { get; set; }
+        public bool IsExcepctionSession { get; set; } = false;
     }
 }

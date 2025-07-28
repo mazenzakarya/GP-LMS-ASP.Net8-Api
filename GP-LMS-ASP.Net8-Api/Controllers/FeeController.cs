@@ -1,6 +1,8 @@
-﻿using GP_LMS_ASP.Net8_Api.Context;
+﻿using System.Security.Claims;
+using GP_LMS_ASP.Net8_Api.Context;
 using GP_LMS_ASP.Net8_Api.DTOs;
 using GP_LMS_ASP.Net8_Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,10 +35,10 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 Discount = dto.Discount,
                 Type = dto.Type,
                 Status = FeeStatus.Paid,
+                NetAmount = dto.Amount - (dto.Discount ?? 0),
                 Notes = dto.Notes,
                 GroupId = dto.GroupId,
                 CourseId = dto.CourseId,
-                PaymentCycleId = dto.PaymentCycleId,
                 Date = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedByUser = GetCurrentUsername()
@@ -87,10 +89,10 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             var dto = new FeeShowDTO
             {
+                //net amount is computed prop
                 FeeId = fee.FeeId,
                 Amount = fee.Amount,
                 Discount = fee.Discount,
-                NetAmount = fee.NetAmount,
                 Type = fee.Type,
                 Status = fee.Status,
                 Notes = fee.Notes,
@@ -100,7 +102,6 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 GroupName = fee.Group?.Name,
                 StudentId = fee.StudentId,
                 StudentName = fee.Student?.Name,
-                PaymentCycleId = fee.PaymentCycleId,
                 Date = fee.Date,
                 CreatedByUser = fee.UpdatedByUser,
                 UpdatedAt = fee.UpdatedAt,
@@ -157,10 +158,10 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             {
                 TotalAmount = fees.Sum(f => f.Amount),
                 TotalDiscount = fees.Sum(f => f.Discount ?? 0),
-                TotalNet = fees.Sum(f => f.NetAmount),
-                TotalPaid = fees.Where(f => f.Status == FeeStatus.Paid).Sum(f => f.NetAmount),
-                TotalUnpaid = fees.Where(f => f.Status == FeeStatus.Unpaid).Sum(f => f.NetAmount),
-                TotalOverdue = fees.Where(f => f.Status == FeeStatus.Overdue).Sum(f => f.NetAmount)
+                TotalNet = fees.Sum(f => f.Amount - (f.Discount ?? 0)),
+                TotalPaid = fees.Where(f => f.Status == FeeStatus.Paid).Sum(f => f.Amount - (f.Discount ?? 0)),
+                TotalUnpaid = fees.Where(f => f.Status == FeeStatus.Unpaid).Sum(f => f.Amount - (f.Discount ?? 0)),
+                TotalOverdue = fees.Where(f => f.Status == FeeStatus.Overdue).Sum(f => f.Amount - (f.Discount ?? 0))
             };
 
             return Ok(report);
@@ -173,6 +174,15 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 .Where(f => f.StudentId == studentId)
                 .Include(f => f.Course)
                 .Include(f => f.Group)
+                .Select(f => new
+                {
+                    f.FeeId,
+                    f.NetAmount,
+                    f.Status,
+                    CourseName = f.Course.Name,
+                    GroupName = f.Group.Name,
+                    f.CreatedAt
+                })
                 .ToListAsync();
 
             return Ok(fees);
@@ -202,6 +212,66 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 .ToList();
 
             return Ok(unpaidStudents);
+        }
+
+        //get total revenue
+        // total revenue = sum of (Amount - Discount)
+        [HttpGet("revenue/total")]
+        public async Task<IActionResult> GetTotalRevenue()
+        {
+            var totalRevenue = await db.Fees
+                .Where(f => f.Status == FeeStatus.Paid)
+                .SumAsync(f => f.Amount - (f.Discount ?? 0));
+
+            return Ok(totalRevenue);
+        }
+
+        //full report of fees in and out
+        [HttpGet("report/financial")]
+        public async Task<IActionResult> GetFinancialReport()
+        {
+            var totalRevenue = await db.Fees
+                .Where(f => f.Status == FeeStatus.Paid && !f.IsDeleted)
+                .SumAsync(f => f.Amount - (f.Discount ?? 0));
+
+            var totalExpenses = await db.Expenses
+                .Where(e => !e.IsDeleted)
+                .SumAsync(e => e.Amount);
+
+            var netProfit = totalRevenue - totalExpenses;
+
+            return Ok(new
+            {
+                TotalRevenue = totalRevenue,
+                TotalExpenses = totalExpenses,
+                NetProfit = netProfit
+            });
+        }
+
+        //for deduct amount
+        [Authorize]
+        [HttpPost("add-expense")]
+        public async Task<IActionResult> AddExpense(Expense expense)
+        {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized("Invalid token");
+
+            expense.PaidBy = username;
+            expense.CreatedAt = DateTime.UtcNow;
+
+            db.Expenses.Add(expense);
+            await db.SaveChangesAsync();
+
+            return Ok(new
+            {
+                expense.ExpenseId,
+                expense.Description,
+                expense.Amount,
+                expense.Category,
+                expense.PaidBy,
+                expense.CreatedAt
+            });
         }
     }
 }

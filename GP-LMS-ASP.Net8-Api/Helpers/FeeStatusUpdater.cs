@@ -13,25 +13,25 @@ namespace GP_LMS_ASP.Net8_Api.Helpers
             db = context;
         }
 
-        public async Task UpdateFeeStatusesAsync()
+        public async Task UpdateFeeStatusesAsync(int studentId, int groupId)
         {
             var monthlyFees = await db.Fees
-                .Where(f => f.Type == FeeType.Monthly && f.Status == FeeStatus.Paid)
-                .Include(f => f.Student)
+                .Where(f => f.Type == FeeType.Monthly
+                            && f.Status == FeeStatus.Paid
+                            && f.StudentId == studentId
+                            && f.GroupId == groupId)
                 .ToListAsync();
 
             foreach (var fee in monthlyFees)
             {
-                // Get number of attendances after the payment date
                 int attendanceCount = await db.Attendances
                     .Where(a => a.StudentId == fee.StudentId
                              && a.GroupId == fee.GroupId
-                             && a.Date > fee.Date)
+                             && a.Date > fee.Date
+                             && !a.IsExcepctionSession)
                     .CountAsync();
 
-                bool expiredByAttendance = attendanceCount >= 4;
-
-                if (expiredByAttendance)
+                if (attendanceCount % 4 == 0)
                 {
                     fee.Status = FeeStatus.Unpaid;
                 }

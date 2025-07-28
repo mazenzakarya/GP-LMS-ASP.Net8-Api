@@ -29,7 +29,7 @@
 
         public string Notes { get; set; }
         public decimal? Discount { get; set; }
-        public decimal NetAmount => Amount - (Discount ?? 0);
+        public decimal NetAmount { get; set; }
 
         public int GroupId { get; set; }
         public virtual Groups Group { get; set; }

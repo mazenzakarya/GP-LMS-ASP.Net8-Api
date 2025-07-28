@@ -9,16 +9,17 @@ namespace GP_LMS_ASP.Net8_Api.Context
         {
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Parent> Parents { get; set; }
-        public DbSet<StudentGroup> StudentGroups { get; set; }
-        public DbSet<Groups> Groups { get; set; }
-        public DbSet<Grade> Grades { get; set; }
-        public DbSet<Fee> Fees { get; set; }
-        public DbSet<CourseSubjectElements> CourseSubjectElements { get; set; }
-        public DbSet<CourseSubject> CourseSubjects { get; set; }
-        public DbSet<Course> Courses { get; set; }
-        public DbSet<Attendance> Attendances { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Parent> Parents { get; set; }
+        public virtual DbSet<StudentGroup> StudentGroups { get; set; }
+        public virtual DbSet<Groups> Groups { get; set; }
+        public virtual DbSet<Grade> Grades { get; set; }
+        public virtual DbSet<Fee> Fees { get; set; }
+        public virtual DbSet<CourseSubjectElements> CourseSubjectElements { get; set; }
+        public virtual DbSet<CourseSubject> CourseSubjects { get; set; }
+        public virtual DbSet<Course> Courses { get; set; }
+        public virtual DbSet<Attendance> Attendances { get; set; }
+        public virtual DbSet<Expense> Expenses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,6 +44,7 @@ namespace GP_LMS_ASP.Net8_Api.Context
             modelBuilder.Entity<CourseSubject>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<CourseSubjectElements>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Fee>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Expense>().HasQueryFilter(e => !e.IsDeleted);
         }
     }
 }

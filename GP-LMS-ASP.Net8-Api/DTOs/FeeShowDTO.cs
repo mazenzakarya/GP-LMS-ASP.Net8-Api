@@ -7,7 +7,7 @@ namespace GP_LMS_ASP.Net8_Api.DTOs
         public int FeeId { get; set; }
         public decimal Amount { get; set; }
         public decimal? Discount { get; set; }
-        public decimal NetAmount { get; set; }
+        public decimal NetAmount => Amount - (Discount ?? 0);
         public FeeType Type { get; set; }
         public FeeStatus Status { get; set; }
         public string? Notes { get; set; }
@@ -24,7 +24,6 @@ namespace GP_LMS_ASP.Net8_Api.DTOs
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
-        public int? PaymentCycleId { get; set; }
         public DateTime Date { get; set; }
     }
 }
