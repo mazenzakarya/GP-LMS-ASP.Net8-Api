@@ -139,5 +139,36 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        // GET: api/CourseSubjectElements/pending/{studentId}
+        [HttpGet("pending/{studentId}")]
+        public async Task<ActionResult<IEnumerable<CourseSubjectElementDto>>> GetUnGradedElementsForStudent(int studentId)
+        {
+            var groupIds = await _context.StudentGroups
+                .Where(sg => sg.StudentId == studentId)
+                .Select(sg => sg.GroupId)
+                .ToListAsync();
+
+            if (!groupIds.Any())
+                return NotFound("Student is not assigned to any group.");
+
+            var elements = await _context.CourseSubjectElements
+                .Where(e => groupIds.Contains(e.GroupId) &&
+                            !_context.Grades.Any(g => g.ElementId == e.CourseSubjectElementsId && g.StudentId == studentId))
+                .Select(e => new CourseSubjectElementDto
+                {
+                    CourseSubjectElementsId = e.CourseSubjectElementsId,
+                    SubjectId = e.SubjectId,
+                    CourseId = e.CourseId,
+                    GroupId = e.GroupId,
+                    Description = e.Description,
+                    Date = e.Date,
+                    DueDate = e.DueDate,
+                    TotalMarks = e.TotalMarks
+                })
+                .ToListAsync();
+
+            return Ok(elements);
+        }
     }
 }
