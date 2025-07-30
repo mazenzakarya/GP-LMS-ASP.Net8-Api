@@ -3,6 +3,9 @@
     public class AssginStudentsGroupDTO
     {
         public int GroupId { get; set; }
-        public List<int> StudentIds { get; set; } = new();
+
+        public int StudentId { get; set; }
+
+        // public List<int> StudentIds { get; set; } = new();
     }
 }

@@ -22,13 +22,19 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         public async Task<ActionResult<IEnumerable<CourseSubjectElementDto>>> GetElements()
         {
             var elements = await _context.CourseSubjectElements
+                .Include(e => e.Course)
+                .Include(e => e.Subject)
+                .Include(e => e.Group)
                 .Where(e => !e.IsDeleted)
                 .Select(e => new CourseSubjectElementDto
                 {
                     CourseSubjectElementsId = e.CourseSubjectElementsId,
                     SubjectId = e.SubjectId,
+                    SubjectName = e.Subject.Name,
                     CourseId = e.CourseId,
+                    CourseName = e.Course.Name,
                     GroupId = e.GroupId,
+                    GroupName = e.Group.Name,
                     Description = e.Description,
                     Date = e.Date,
                     DueDate = e.DueDate,
@@ -140,6 +146,8 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             return NoContent();
         }
 
+        /*---------------------------------*/
+
         // GET: api/CourseSubjectElements/pending/{studentId}
         [HttpGet("pending/{studentId}")]
         public async Task<ActionResult<IEnumerable<CourseSubjectElementDto>>> GetUnGradedElementsForStudent(int studentId)
@@ -159,8 +167,11 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 {
                     CourseSubjectElementsId = e.CourseSubjectElementsId,
                     SubjectId = e.SubjectId,
+                    SubjectName = e.Subject.Name,
                     CourseId = e.CourseId,
+                    CourseName = e.Course.Name,
                     GroupId = e.GroupId,
+                    GroupName = e.Group.Name,
                     Description = e.Description,
                     Date = e.Date,
                     DueDate = e.DueDate,

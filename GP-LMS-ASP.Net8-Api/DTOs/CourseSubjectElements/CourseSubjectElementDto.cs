@@ -5,11 +5,14 @@
     {
         public int CourseSubjectElementsId { get; set; }
         public int SubjectId { get; set; }
+        public string SubjectName { get; set; }
         public int CourseId { get; set; }
+        public string CourseName { get; set; }
         public int GroupId { get; set; }
+        public string GroupName { get; set; }
         public string Description { get; set; }
         public DateTime Date { get; set; }
-        public DateTime DueDate { get; set; }
+        public DateTime? DueDate { get; set; }
         public int TotalMarks { get; set; }
     }
 
