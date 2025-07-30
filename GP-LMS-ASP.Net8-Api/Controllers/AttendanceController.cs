@@ -27,7 +27,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             foreach (var item in attendanceList)
             {
                 var existing = await _context.Attendances
-                    .FirstOrDefaultAsync(a => a.StudentId == item.StudentId && a.GroupId == item.GroupId && !a.IsExcepctionSession);
+                    .FirstOrDefaultAsync(a => a.StudentId == item.StudentId && a.GroupId == item.GroupId && a.Date.Date == item.Date.Date && !a.IsExcepctionSession);
 
                 if (existing != null)
                 {
@@ -71,7 +71,29 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             return Ok(attendance);
         }
 
-        //get student attendace report
+        //get full report with group id
+        [HttpGet("{groupId}")]
+        public async Task<IActionResult> GetGroupAttendance(int groupId)
+        {
+            var attendance = await _context.Attendances
+                .Where(a => a.GroupId == groupId)
+                .Select(a => new
+                {
+                    a.StudentId,
+                    a.Student.Name,
+                    a.Student.Username,
+                    a.Status,
+                    a.Date.Date,
+                    GroupName = a.Group.Name
+                })
+                .ToListAsync();
+
+            return Ok(attendance);
+        }
+
+        // Fix for CS0833: An anonymous type cannot have multiple properties with the same name
+        // The issue occurs because `a.Date.Date` is used multiple times in the anonymous type, causing duplicate property names.
+
         [HttpGet("student/{studentId}")]
         public async Task<IActionResult> GetStudentAttendance(int studentId)
         {
@@ -80,8 +102,8 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 .OrderByDescending(a => a.Date)
                 .Select(a => new
                 {
-                    a.Date,
-                    a.Group.Name,
+                    a.Date, // Keep the original Date property
+                    GroupName = a.Group.Name, // Rename property to avoid conflict
                     a.Status
                 })
                 .ToListAsync();
