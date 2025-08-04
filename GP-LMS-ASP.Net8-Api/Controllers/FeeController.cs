@@ -231,7 +231,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         public async Task<IActionResult> GetFinancialReport()
         {
             var totalRevenue = await db.Fees
-                .Where(f => f.Status == FeeStatus.Paid && !f.IsDeleted)
+                .Where(f => f.Status == FeeStatus.Paid)
                 .SumAsync(f => f.Amount - (f.Discount ?? 0));
 
             var totalExpenses = await db.Expenses
@@ -253,7 +253,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         [HttpPost("add-expense")]
         public async Task<IActionResult> AddExpense(Expense expense)
         {
-            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+            var username = GetCurrentUsername();
             if (string.IsNullOrEmpty(username))
                 return Unauthorized("Invalid token");
 
@@ -271,6 +271,80 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 expense.Category,
                 expense.PaidBy,
                 expense.CreatedAt
+            });
+        }
+
+        //neeeeeeeeeeeeew
+        [HttpGet("student/{studentId}/summary")]
+        public async Task<IActionResult> GetStudentCourseGroupSummary(int studentId)
+        {
+            var studentGroups = await db.StudentGroups
+                .Where(sg => sg.StudentId == studentId)
+                .Include(sg => sg.Group)
+                    .ThenInclude(g => g.Course)
+                .ToListAsync();
+
+            var grouped = studentGroups
+                .GroupBy(sg => sg.Group.Course)
+                .Select(courseGroup => new
+                {
+                    CourseId = courseGroup.Key.CourseId,
+                    CourseName = courseGroup.Key.Name,
+                    Groups = courseGroup.Select(g => new
+                    {
+                        GroupId = g.Group.GroupsId,
+                        GroupName = g.Group.Name,
+                        Amount = g.Group.Amount
+                    }),
+                    TotalAmount = courseGroup.Sum(g => g.Group.Amount)
+                });
+
+            return Ok(grouped);
+        }
+
+        [HttpGet("summary")]
+        public async Task<IActionResult> GetFinancialSummary()
+        {
+            //Get all paid fees with necessary details
+            var paidFees = await db.Fees
+                .Where(f => f.Status == FeeStatus.Paid)
+                .Select(f => new
+                {
+                    f.FeeId,
+                    f.StudentId,
+                    StudentName = f.Student.Name,
+                    CourseName = f.Course.Name,
+                    GroupName = f.Group.Name,
+                    NetAmount = f.Amount - (f.Discount ?? 0),
+                    f.CreatedAt,
+                    RecordedBy = f.UpdatedByUser
+                })
+                .ToListAsync();
+
+            //Get all expenses with necessary details
+            var expenses = await db.Expenses
+                .Select(e => new
+                {
+                    e.ExpenseId,
+                    e.Description,
+                    e.Category,
+                    e.Amount,
+                    e.CreatedAt,
+                    PaidBy = e.PaidBy,
+                })
+                .ToListAsync();
+
+            var totalRevenue = paidFees.Sum(f => f.NetAmount);
+            var totalExpenses = expenses.Sum(e => e.Amount);
+            var netProfit = totalRevenue - totalExpenses;
+
+            return Ok(new
+            {
+                TotalRevenue = totalRevenue,
+                TotalExpenses = totalExpenses,
+                NetProfit = netProfit,
+                PaidFees = paidFees,
+                Expenses = expenses
             });
         }
     }
