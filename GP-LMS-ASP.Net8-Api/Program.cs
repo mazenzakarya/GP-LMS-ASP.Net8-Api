@@ -96,6 +96,21 @@ namespace GP_LMS_ASP.Net8_Api
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddScoped<AiAssistantService>();
+
+            builder.Services.AddHttpClient();
+
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                // HTTPS
+                options.ListenAnyIP(7096, listenOptions =>
+                {
+                    listenOptions.UseHttps();
+                });
+
+                // HTTP
+                options.ListenAnyIP(5187); // نفس البورت اللي موجود في launchSettings.json
+            });
 
             var app = builder.Build();
 

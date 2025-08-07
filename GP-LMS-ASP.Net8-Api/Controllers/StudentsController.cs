@@ -17,34 +17,59 @@ public class StudentsController : ControllerBase
 
     // GET: api/students
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
+    public async Task<ActionResult<IEnumerable<StudentithPerantDTO>>> GetStudents()
     {
         var students = await _context.Users
             .Where(u => u.Role == "Student" && !u.IsDeleted)
             .Include(u => u.Parent)
-            .Select(u => new StudentDTO
+            .Select(u => new StudentithPerantDTO
             {
                 UserId = u.UserId,
                 Name = u.Name,
+                Username = u.Username,
                 Gender = u.Gender,
                 PhoneNumber = u.PhoneNumber,
                 DOB = u.DOB,
                 Address = u.Address,
-                ParentId = u.ParentId,
-                FatherName = u.Parent != null ? u.Parent.FatherName : null,
-                MotherName = u.Parent != null ? u.Parent.MotherName : null,
-                ParentPhoneNumber = u.Parent != null ? u.Parent.PhoneNumber : null
+                Parent = u.Parent == null ? null : new ParentDTO
+                {
+                    ParentId = u.Parent.ParentId,
+                    FatherName = u.Parent.FatherName,
+                    MotherName = u.Parent.MotherName,
+                    PhoneNumber = u.Parent.PhoneNumber
+                }
             })
             .ToListAsync();
 
         return Ok(students);
     }
 
-
     // POST: api/students
     [HttpPost]
     public async Task<ActionResult> AddStudent(StudentDTO dto)
     {
+        // 1. Generate unique username automatically
+        string baseUsername = dto.Name.Replace(" ", "").ToLower(); // remove spaces
+        string generatedUsername = "";
+        int counter = 1;
+
+        do
+        {
+            generatedUsername = baseUsername + counter;
+            counter++;
+        } while (await _context.Users.AnyAsync(u => u.Username == generatedUsername));
+
+        // 2. Create parent
+        var parent = new Parent
+        {
+            FatherName = dto.FatherName,
+            MotherName = dto.MotherName,
+            PhoneNumber = dto.ParentPhoneNumber
+        };
+        _context.Parents.Add(parent);
+        await _context.SaveChangesAsync();
+
+        // 3. Create student
         var student = new User
         {
             Name = dto.Name,
@@ -54,14 +79,20 @@ public class StudentsController : ControllerBase
             PhoneNumber = dto.PhoneNumber,
             Address = dto.Address,
             IsDeleted = false,
-            PasswordHash = "dummy", // Replace with proper password setup
-            Username = GenerateUsername(dto.Name) // optional logic
+            Username = generatedUsername,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+            ParentId = parent.ParentId
         };
 
         _context.Users.Add(student);
         await _context.SaveChangesAsync();
 
-        return Ok(new { message = "Student added", student.UserId });
+        return Ok(new
+        {
+            message = "Student added successfully.",
+            student.UserId,
+            student.Username
+        });
     }
 
     // GET: api/students/{id}
@@ -123,7 +154,6 @@ public class StudentsController : ControllerBase
         return Ok(new { message = "Student moved to new group successfully." });
     }
 
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> SoftDeleteStudent(int id)
     {
@@ -142,21 +172,8 @@ public class StudentsController : ControllerBase
         return Ok(new { message = $"Student with ID {id} has been soft deleted." });
     }
 
-
-
-
     private string GenerateUsername(string name)
     {
         return name.ToLower().Replace(" ", "") + new Random().Next(100, 999);
     }
-
-
-
-
-
-
-
-
-
-
 }

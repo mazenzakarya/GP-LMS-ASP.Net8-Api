@@ -7,7 +7,11 @@
         public int StudentId { get; set; }
         public string StudentName { get; set; }
         public int CourseId { get; set; }
+        public string CourseName { get; set; }   // ✅
+
         public int SubjectId { get; set; }
+        public string SubjectName { get; set; }  // ✅
+
         public int ElementId { get; set; }
         public string ElementDescription { get; set; }
         public int Score { get; set; }

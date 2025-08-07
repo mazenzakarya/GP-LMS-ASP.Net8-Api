@@ -23,7 +23,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         //auto generate username based on full name
         private async Task<string> GenerateUsernameAsync(string fullName)
         {
-            string baseUsername = fullName.ToLower().Replace(" ", "") + new Random().Next(1, 1000);
+            string baseUsername = fullName.ToLower().Replace(" ", "");
             string username = baseUsername;
             int counter = 1;
 

@@ -27,7 +27,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             foreach (var item in attendanceList)
             {
                 var existing = await _context.Attendances
-                    .FirstOrDefaultAsync(a => a.StudentId == item.StudentId && a.GroupId == item.GroupId && a.Date.Date == item.Date.Date && !a.IsExcepctionSession);
+                    .FirstOrDefaultAsync(a => a.StudentId == item.StudentId && a.GroupId == item.GroupId && !a.IsExcepctionSession);
 
                 if (existing != null)
                 {
@@ -51,7 +51,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             var updater = new FeeStatusUpdater(_context);
             await updater.UpdateFeeStatusesAsync(studentId, groupId);
 
-            return Ok("Attendance marked successfully.");
+            return Ok(new { message = "Attendance marked successfully." });
         }
 
         //get attendance by group and date
@@ -104,7 +104,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 {
                     a.Date, // Keep the original Date property
                     GroupName = a.Group.Name, // Rename property to avoid conflict
-                    a.Status
+                    Status = a.Status.ToString()
                 })
                 .ToListAsync();
 

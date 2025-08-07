@@ -22,12 +22,14 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         public async Task<ActionResult<IEnumerable<CourseSubjectDto>>> GetCourseSubjects()
         {
             var subjects = await _context.CourseSubjects
+                 .Include(s => s.Course)
                 .Where(s => !s.IsDeleted)
                 .Select(s => new CourseSubjectDto
                 {
                     CourseSubjectId = s.CourseSubjectId,
                     Name = s.Name,
-                    CourseId = s.CourseId
+                    CourseId = s.CourseId,
+                    CourseName = s.Course.Name
                 })
                 .ToListAsync();
 

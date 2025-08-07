@@ -20,33 +20,41 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             db = context;
         }
 
-        private string? GetCurrentUsername()
+        private string GetCurrentUsername()
         {
-            return User.Identity?.Name ?? User.FindFirst("name")?.Value;
+            return User.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown";
         }
 
         [HttpPost]
         public async Task<IActionResult> AddFee([FromBody] CreateFeeDTO dto)
         {
-            var fee = new Fee
+            var username = GetCurrentUsername() ?? "Unknown";
+            try
             {
-                StudentId = dto.StudentId,
-                Amount = dto.Amount,
-                Discount = dto.Discount,
-                Type = dto.Type,
-                Status = FeeStatus.Paid,
-                NetAmount = dto.Amount - (dto.Discount ?? 0),
-                Notes = dto.Notes,
-                GroupId = dto.GroupId,
-                CourseId = dto.CourseId,
-                Date = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedByUser = GetCurrentUsername()
-            };
+                var fee = new Fee
+                {
+                    StudentId = dto.StudentId,
+                    Amount = dto.Amount,
+                    Discount = dto.Discount,
+                    Type = dto.Type,
+                    Status = FeeStatus.Paid,
+                    NetAmount = dto.Amount - (dto.Discount ?? 0),
+                    Notes = dto.Notes,
+                    GroupId = dto.GroupId,
+                    CourseId = dto.CourseId,
+                    Date = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedByUser = GetCurrentUsername()
+                };
 
-            db.Fees.Add(fee);
-            await db.SaveChangesAsync();
-            return Ok(fee);
+                db.Fees.Add(fee);
+                await db.SaveChangesAsync();
+                return Ok(fee);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         [HttpGet]
@@ -125,7 +133,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             fee.Notes = dto.Notes;
             fee.GroupId = dto.GroupId;
             fee.CourseId = dto.CourseId;
-            fee.PaymentCycleId = dto.PaymentCycleId;
+            //fee.PaymentCycleId = dto.PaymentCycleId;
 
             fee.UpdatedAt = DateTime.UtcNow;
             fee.UpdatedByUser = GetCurrentUsername();
@@ -178,7 +186,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 {
                     f.FeeId,
                     f.NetAmount,
-                    f.Status,
+                    Status = f.Status.ToString(),
                     CourseName = f.Course.Name,
                     GroupName = f.Group.Name,
                     f.CreatedAt
@@ -231,7 +239,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         public async Task<IActionResult> GetFinancialReport()
         {
             var totalRevenue = await db.Fees
-                .Where(f => f.Status == FeeStatus.Paid)
+                .Where(f => f.Status == FeeStatus.Paid && !f.IsDeleted)
                 .SumAsync(f => f.Amount - (f.Discount ?? 0));
 
             var totalExpenses = await db.Expenses
@@ -253,7 +261,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         [HttpPost("add-expense")]
         public async Task<IActionResult> AddExpense(Expense expense)
         {
-            var username = GetCurrentUsername();
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
             if (string.IsNullOrEmpty(username))
                 return Unauthorized("Invalid token");
 
@@ -272,6 +280,41 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 expense.PaidBy,
                 expense.CreatedAt
             });
+
+            /*get Expence*/
+        }
+
+        [HttpGet("expenses")]
+        public async Task<IActionResult> GetAllExpenses()
+        {
+            var expenses = await db.Expenses
+                .Where(e => !e.IsDeleted)
+                .OrderByDescending(e => e.CreatedAt)
+                .Select(e => new
+                {
+                    e.ExpenseId,
+                    e.Description,
+                    e.Amount,
+                    e.Category,
+                    e.PaidBy,
+                    e.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(expenses);
+        }
+
+        [HttpDelete("expense/{id}")]
+        public async Task<IActionResult> DeleteExpense(int id)
+        {
+            var expense = await db.Expenses.FindAsync(id);
+            if (expense == null)
+                return NotFound("Expense not found.");
+
+            expense.IsDeleted = true;
+            await db.SaveChangesAsync();
+
+            return Ok(new { message = "Expense deleted successfully." });
         }
 
         //neeeeeeeeeeeeew
@@ -336,7 +379,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             var totalRevenue = paidFees.Sum(f => f.NetAmount);
             var totalExpenses = expenses.Sum(e => e.Amount);
-            var netProfit = totalRevenue - totalExpenses;
+            var netProfit = totalExpenses - totalRevenue;
 
             return Ok(new
             {

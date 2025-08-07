@@ -75,7 +75,6 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         [HttpPost]
         public async Task<ActionResult<CourseSubjectElementDto>> CreateElement(CourseSubjectElementCreateDto dto)
         {
-            // تأكد من وجود البيانات المرتبطة
             var subjectExists = await _context.CourseSubjects.AnyAsync(s => s.CourseSubjectId == dto.SubjectId && !s.IsDeleted);
             var courseExists = await _context.Courses.AnyAsync(c => c.CourseId == dto.CourseId && !c.IsDeleted);
             var groupExists = await _context.Groups.AnyAsync(g => g.GroupsId == dto.GroupId);

@@ -48,6 +48,41 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             return Ok(students);
         }
 
+        //[HttpPost("assign-students")]
+        //public async Task<IActionResult> AssignStudentsToGroup([FromBody] AssginStudentsGroupDTO dto)
+        //{
+        //    if (!await _context.Groups.AnyAsync(g => g.GroupsId == dto.GroupId))
+        //        return NotFound($"Group with ID {dto.GroupId} not found.");
+
+        //    var validStudents = await _context.Users
+        //        .Where(u => dto.StudentIds.Contains(u.UserId) && u.Role == "Student" && !u.IsDeleted)
+        //        .ToListAsync();
+
+        //    if (!validStudents.Any())
+        //        return BadRequest("No valid students found to assign.");
+
+        //    var existingAssignments = await _context.StudentGroups
+        //        .Where(sg => sg.GroupId == dto.GroupId && dto.StudentIds.Contains(sg.StudentId))
+        //        .ToListAsync();
+
+        //    var newAssignments = validStudents
+        //        .Where(s => !existingAssignments.Any(ea => ea.StudentId == s.UserId))
+        //        .Select(s => new StudentGroup
+        //        {
+        //            GroupId = dto.GroupId,
+        //            StudentId = s.UserId,
+        //            PaymentStatus = "Unpaid" // or default
+        //        })
+        //        .ToList();
+
+        //    _context.StudentGroups.AddRange(newAssignments);
+        //    await _context.SaveChangesAsync();
+
+        //    return Ok(new { message = "Students assigned successfully", assignedCount = newAssignments.Count });
+        //}
+
+        /*------------------------------------------*/
+
         [HttpPost("assign-student")]
         public async Task<IActionResult> AssignStudentToGroup([FromBody] AssginStudentsGroupDTO dto)
         {
@@ -78,6 +113,8 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             return Ok(new { message = "Student assigned successfully" });
         }
+
+        /*--------------------------------------------------------*/
 
         [HttpGet("student/{studentId}/group-details")]
         public async Task<IActionResult> GetStudentGroupDetails(int studentId)
@@ -113,11 +150,14 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         {
             var groupClassInfo = await _context.StudentGroups
                 .Include(sg => sg.Group)
+                    .ThenInclude(g => g.Course)
                 .Where(sg => sg.StudentId == studentId)
                 .Select(sg => new
                 {
                     GroupId = sg.GroupId,
-                    CourseId = sg.Group.CourseId
+                    GroupName = sg.Group.Name,
+                    CourseId = sg.Group.CourseId,
+                    CourseName = sg.Group.Course.Name
                 })
                 .FirstOrDefaultAsync();
 

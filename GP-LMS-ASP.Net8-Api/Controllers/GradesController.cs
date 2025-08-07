@@ -28,13 +28,17 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                 .Where(g => g.StudentId == studentId)
                 .Include(g => g.Student)
                 .Include(g => g.Element)
+                .Include(g => g.Course)   // Include Course
+                .Include(g => g.Subject)  // Include Subject
                 .Select(g => new GradeDto
                 {
                     GradeId = g.GradeId,
                     StudentId = g.StudentId,
                     StudentName = g.Student.Name,
                     CourseId = g.CourseId,
+                    CourseName = g.Course.Name,
                     SubjectId = g.SubjectId,
+                    SubjectName = g.Subject.Name,    // ✅
                     ElementId = g.ElementId,
                     ElementDescription = g.Element.Description,
                     Score = g.Score,

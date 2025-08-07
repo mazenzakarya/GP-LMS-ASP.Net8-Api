@@ -6,6 +6,7 @@
         public int CourseSubjectId { get; set; }
         public string Name { get; set; }
         public int CourseId { get; set; }
+        public string CourseName { get; set; }
     }
 
     // CourseSubjectCreateDto.cs
