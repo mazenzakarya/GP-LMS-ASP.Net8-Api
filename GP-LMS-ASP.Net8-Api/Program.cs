@@ -100,18 +100,6 @@ namespace GP_LMS_ASP.Net8_Api
 
             builder.Services.AddHttpClient();
 
-            builder.WebHost.ConfigureKestrel(options =>
-            {
-                // HTTPS
-                options.ListenAnyIP(7096, listenOptions =>
-                {
-                    listenOptions.UseHttps();
-                });
-
-                // HTTP
-                options.ListenAnyIP(5187); // نفس البورت اللي موجود في launchSettings.json
-            });
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

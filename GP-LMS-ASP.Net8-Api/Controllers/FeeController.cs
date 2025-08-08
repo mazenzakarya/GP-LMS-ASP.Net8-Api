@@ -25,6 +25,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             return User.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown";
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> AddFee([FromBody] CreateFeeDTO dto)
         {
@@ -44,7 +45,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                     CourseId = dto.CourseId,
                     Date = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedByUser = GetCurrentUsername()
+                    UpdatedByUser = username
                 };
 
                 db.Fees.Add(fee);
@@ -133,7 +134,6 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
             fee.Notes = dto.Notes;
             fee.GroupId = dto.GroupId;
             fee.CourseId = dto.CourseId;
-            //fee.PaymentCycleId = dto.PaymentCycleId;
 
             fee.UpdatedAt = DateTime.UtcNow;
             fee.UpdatedByUser = GetCurrentUsername();

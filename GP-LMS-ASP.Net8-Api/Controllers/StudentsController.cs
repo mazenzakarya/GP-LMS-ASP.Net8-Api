@@ -172,8 +172,24 @@ public class StudentsController : ControllerBase
         return Ok(new { message = $"Student with ID {id} has been soft deleted." });
     }
 
-    private string GenerateUsername(string name)
+    // PUT: api/students/update/{id}
+    [HttpPut("update/{id}")]
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateStudentDTO dto)
     {
-        return name.ToLower().Replace(" ", "") + new Random().Next(100, 999);
+        var student = await _context.Users
+            .FirstOrDefaultAsync(u => u.UserId == id && u.Role == "Student");
+
+        if (student == null)
+            return NotFound($"Student with ID {id} not found.");
+
+        student.Name = dto.Name;
+        if (!string.IsNullOrWhiteSpace(dto.PasswordHash))
+        {
+            student.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.PasswordHash);
+        }
+
+        await _context.SaveChangesAsync();
+
+        return Ok("Student updated successfully.");
     }
 }
