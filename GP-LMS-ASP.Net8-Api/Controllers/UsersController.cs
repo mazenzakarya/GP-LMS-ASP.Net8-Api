@@ -42,7 +42,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers([FromQuery] string? role = null)
         {
-            var query = db.Users.AsQueryable();
+            var query = db.Users.AsQueryable().AsNoTracking();
 
             if (!string.IsNullOrEmpty(role))
                 query = query.Where(u => u.Role == role);
@@ -71,6 +71,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
         public async Task<ActionResult<UserReadDTO>> GetUser(int id)
         {
             var user = await db.Users
+                .AsNoTracking()
                 .Where(u => u.UserId == id)
                 .Select(u => new UserReadDTO
                 {
@@ -85,6 +86,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
                     Address = u.Address,
                     DOB = u.DOB
                 })
+
                 .FirstOrDefaultAsync();
 
             if (user == null) return NotFound();
