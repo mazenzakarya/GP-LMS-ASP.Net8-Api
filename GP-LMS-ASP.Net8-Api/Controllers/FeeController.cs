@@ -379,7 +379,7 @@ namespace GP_LMS_ASP.Net8_Api.Controllers
 
             var totalRevenue = paidFees.Sum(f => f.NetAmount);
             var totalExpenses = expenses.Sum(e => e.Amount);
-            var netProfit = totalExpenses - totalRevenue;
+            var netProfit = totalRevenue - totalExpenses;
 
             return Ok(new
             {
